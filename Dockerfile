@@ -6,7 +6,6 @@ ENV MONGODB_URI mongodb://localhost:27017/
 
 COPY requirements.txt /app/
 COPY app.py /app/
-COPY .env /app/
 
 RUN pip install -r requirements.txt &\
     echo $ENV > .env &\
