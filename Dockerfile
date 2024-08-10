@@ -2,6 +2,8 @@ FROM python:3.10-alpine
 
 WORKDIR /app
 
+ENV MONGODB_URI=mongodb://mongo:27017/
+
 COPY requirements.txt /app/
 COPY app.py /app/
 
