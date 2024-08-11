@@ -7,6 +7,6 @@ data:
   username: admin
   mongodb.conf: |  
     storage:
-      dbPath: /data/db  # Sets the MongoDB data storage path
+      dbPath: /data/db  
     replication:
-      replSetName: "rs0"  # Specifies the name of the MongoDB replica set
+      replSetName: "rs0" 
