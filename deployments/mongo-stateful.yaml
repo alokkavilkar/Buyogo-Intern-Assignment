@@ -2,30 +2,35 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mongo
-  labels:
-    app: mongo
 spec:
-  serviceName: mongo-service
-  replicas: 2
   selector:
     matchLabels:
       app: mongo
+  serviceName: mongo-service
+  replicas: 3
   template:
     metadata:
       labels:
         app: mongo
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
-        - name: mongo
-          image: mongo:latest
-          ports:
-            - containerPort: 27017
-          volumeMounts:
-            - name: mongo-pv-pvc
-              mountPath: /data/db
-            - name: mongodb-config-map
-              mountPath: /etc/mongo
-          env:
+      - name: mongo
+        image: mongo
+        command:
+          - mongod
+          - "--replSet"
+          - rs0
+          - "--smallfiles"
+          - "--noprealloc"
+        ports:
+          - containerPort: 27017
+        volumeMounts:
+          - name: mongo-pv-pvc
+            mountPath: /data/db
+          - name: mongodb-config-map
+            mountPath: /etc/mongo
+        env:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -36,19 +41,17 @@ spec:
                 secretKeyRef:
                   name: mongodb-secret
                   key: mongo-password
-          args:
-            - "--config"
-            - "/etc/mongo/mongod.conf"
-      volumes:
+        volumes:
         - name: mongodb-config-map
           configMap:
             name: mongodb-config-map
+            
   volumeClaimTemplates:
     - metadata:
         name: mongo-pv-pvc
       spec:
-        accessModes: [ "ReadWriteOnce" ]
         storageClassName: "standard"
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 1Gi
+            storage: 100Gi
