@@ -1,57 +1,44 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mongo
+  name: mongo-db
 spec:
+  serviceName: mongo-db
+  replicas: 2
   selector:
     matchLabels:
-      app: mongo
-  serviceName: mongo-service
-  replicas: 3
+      app: mongo-db
   template:
     metadata:
       labels:
-        app: mongo
+        app: mongo-db
     spec:
-      terminationGracePeriodSeconds: 10
       containers:
-      - name: mongo
-        image: mongo
-        command:
-          - mongod
-          - "--replSet"
-          - rs0
-          - "--smallfiles"
-          - "--noprealloc"
-        ports:
-          - containerPort: 27017
-        volumeMounts:
-          - name: mongo-pv-pvc
-            mountPath: /data/db
-          - name: mongodb-config-map
-            mountPath: /etc/mongo
-        env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mongodb-secret
-                  key: mongo-username
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mongodb-secret
-                  key: mongo-password
-        volumes:
-        - name: mongodb-config-map
-          configMap:
-            name: mongodb-config-map
-            
-  volumeClaimTemplates:
-    - metadata:
-        name: mongo-pv-pvc
-      spec:
-        storageClassName: "standard"
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 100Gi
+        -
+          name: mongo-db
+          image: mongo
+          imagePullPolicy: Always
+          env:
+            -
+              name: "MONGO_INITDB_ROOT_USERNAME"
+              value: "admin"
+
+            -
+              name: "MONGO_INITDB_ROOT_PASSWORD"
+              value: "password"
+
+          ports:
+            -
+              containerPort: 27017
+              name: mongodb
+
+          volumeMounts:
+            -
+              name: mongodb-persistent-storage
+              mountPath: "/data/db"
+
+      volumes:
+        -
+          name: mongodb-persistent-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
