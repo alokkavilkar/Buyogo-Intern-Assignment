@@ -21,7 +21,7 @@ spec:
         - containerPort: 5000
         env:
         - name: MONGO_URI
-          value: mongodb://admin:password@mongo-service:27017/?authSource=admin
+          value: mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017/dbname\_?
         resources:
             requests:
               memory: "250Mi"
