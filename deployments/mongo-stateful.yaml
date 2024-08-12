@@ -6,8 +6,8 @@ spec:
   selector:
     matchLabels:
       app: mongo
-  serviceName: "mongo"
-  replicas: 3
+  serviceName: mongo
+  replicas: 2
   template:
     metadata:
       labels:
@@ -16,49 +16,16 @@ spec:
       containers:
         - name: mongo
           image: mongo:4.0.8
-          startupProbe:
-            exec:
-              command:
-                - mongo
-                - --eval
-                - "db.adminCommand('ping')"
-            initialDelaySeconds: 1
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 2
-          livenessProbe:
-            exec:
-              command:
-                - mongo
-                - --eval
-                - "db.adminCommand('ping')"
-            initialDelaySeconds: 1
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 2
-          readinessProbe:
-            exec:
-              command:
-                - mongo
-                - --eval
-                - "db.adminCommand('ping')"
-            initialDelaySeconds: 1
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 2
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
-                configMapKeyRef:
-                  key: username
-                  name: mongodb-config
+                secretKeyRef:
+                  key: mongo-username
+                  name: mongodb-secret
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: password
+                  key: mongo-password
                   name: mongodb-secret
           command:
             - mongod
@@ -81,7 +48,8 @@ spec:
         name: mongo-volume
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: demo-storage
+        storageClassName: standard
         resources:
           requests:
-            storage: 1Gi
+            storage: 2Gi
+
